@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadence Calculator</title>
+<meta name="description" content="Enter how long a pack of your product lasts, and get a post-purchase email schedule timed to it, from the thank-you to the reorder.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2eee6;
+  --panel: #f8f5ef;
+  --ink: #1d1c19;
+  --muted: #6c675e;
+  --rule: #d3ccbf;
+  --field: #fffdf9;
+  --afterglow: #a65a24;
+  --tempo: #46633f;
+  --rest: #5f6a78;
+  --band: #e4ddcf;
+  --grain-opacity: .07;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141310;
+    --panel: #1b1a16;
+    --ink: #ece6db;
+    --muted: #9d968a;
+    --rule: #37342d;
+    --field: #22201b;
+    --afterglow: #d9925a;
+    --tempo: #8fb184;
+    --rest: #9aa6b6;
+    --band: #2b2922;
+    --grain-opacity: .09;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141310; --panel: #1b1a16; --ink: #ece6db; --muted: #9d968a; --rule: #37342d;
+  --field: #22201b; --afterglow: #d9925a; --tempo: #8fb184; --rest: #9aa6b6; --band: #2b2922; --grain-opacity: .09;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 "Hanken Grotesk", system-ui, sans-serif;
+  letter-spacing: -0.005em;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  z-index: 10;
+}
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+.label {
+  font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.serif { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+header { padding: 56px 0 40px; }
+header .top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 48px; }
+h1 {
+  font-weight: 500; font-size: clamp(40px, 8vw, 76px); line-height: .98; letter-spacing: -0.035em; margin: 0 0 20px;
+}
+h1 .serif { font-size: 1.08em; }
+.lede { max-width: 560px; font-size: 18px; color: var(--muted); margin: 0; }
+
+section { padding: 40px 0; }
+.sec-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 24px; }
+.sec-head .num { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 22px; color: var(--muted); min-width: 28px; }
+h2 { font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin: 0; }
+
+/* inputs */
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.presets button {
+  font: inherit; font-size: 14px; color: var(--ink); background: transparent;
+  border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+}
+.presets button:hover, .presets button[aria-pressed="true"] { border-color: var(--ink); }
+.fields { display: grid; grid-template-columns: 1fr; gap: 16px 24px; }
+@media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 900px) { .fields { grid-template-columns: repeat(3, 1fr); } }
+.field label { display: block; margin-bottom: 6px; }
+.field .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.field input {
+  width: 100%; font: inherit; font-size: 20px; color: var(--ink);
+  background: var(--field); border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px;
+}
+.field input:focus { outline: none; border-color: var(--ink); }
+.field.wide { grid-column: 1 / -1; }
+@media (min-width: 900px) { .field.wide { grid-column: span 1; } }
+
+/* tempo figures */
+.figures { display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--rule); }
+@media (min-width: 720px) { .figures { grid-template-columns: repeat(3, 1fr); } }
+.fig { padding: 24px 0; border-bottom: 1px solid var(--rule); }
+@media (min-width: 720px) {
+  .fig { padding: 28px 24px; border-bottom: 0; border-left: 1px solid var(--rule); }
+  .fig:first-child { border-left: 0; padding-left: 0; }
+}
+.fig .value { font-size: 56px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; margin: 10px 0 8px; }
+.fig .value .unit { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 26px; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
+.fig p { margin: 0; font-size: 14px; color: var(--muted); }
+.note {
+  margin-top: 20px; padding: 14px 16px; border-left: 2px solid var(--afterglow); background: var(--panel); font-size: 15px;
+}
+.note[hidden] { display: none; }
+
+/* timeline */
+.timeline { width: 100%; overflow: hidden; }
+.timeline svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; font-size: 14px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; background: currentColor; }
+.legend .afterglow { color: var(--afterglow); }
+.legend .tempo { color: var(--tempo); }
+.legend .rest { color: var(--rest); }
+.legend em { color: var(--muted); font-style: normal; }
+
+/* schedule */
+.sched { width: 100%; border-collapse: collapse; font-size: 15px; }
+.sched th { text-align: left; font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px 0; border-bottom: 1px solid var(--ink); }
+.sched td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.sched td.n { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 20px; color: var(--muted); width: 32px; }
+.sched td.day { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
+.sched td.delay { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sched .name { font-weight: 500; }
+.sched .why { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.layer { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.layer.afterglow { color: var(--afterglow); }
+.layer.tempo { color: var(--tempo); }
+.layer.rest { color: var(--rest); }
+.ask { display: inline-block; margin-left: 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; }
+@media (max-width: 639px) {
+  .sched thead { display: none; }
+  .sched tr { display: grid; grid-template-columns: 32px 1fr auto; column-gap: 8px; border-bottom: 1px solid var(--rule); padding: 12px 0; }
+  .sched td { border: 0; padding: 0; }
+  .sched td.n { grid-row: 1 / span 3; }
+  .sched td.day { grid-column: 2; }
+  .sched td.delay { grid-column: 3; text-align: right; }
+  .sched td.layer-cell { grid-column: 2 / span 2; margin: 2px 0 4px; }
+  .sched td.what { grid-column: 2 / span 2; }
+}
+.summary { margin: 16px 0 0; color: var(--muted); font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: center; }
+.btn {
+  font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
+  background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: 2px; padding: 10px 18px;
+}
+.btn.ghost { background: transparent; color: var(--ink); }
+.status { font-size: 14px; color: var(--muted); }
+
+/* method */
+.method { display: grid; grid-template-columns: 1fr; gap: 20px 40px; }
+@media (min-width: 720px) { .method { grid-template-columns: 1fr 1fr; } }
+.method h3 { font-weight: 500; font-size: 16px; margin: 0 0 4px; }
+.method p { margin: 0; color: var(--muted); font-size: 15px; }
+
+/* front door */
+.door { padding: 64px 0 48px; }
+.door h2 { font-size: clamp(30px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.03em; max-width: 680px; }
+.door p { max-width: 560px; color: var(--muted); font-size: 17px; margin: 18px 0 28px; }
+.door .start { max-width: 860px; }
+.door .start .fields { margin-top: 8px; }
+.door .hp { position: absolute; left: -9999px; }
+.door .thanks { color: var(--ink); font-size: 18px; border-left: 2px solid var(--tempo); padding-left: 14px; }
+.door .thanks[hidden] { display: none; }
+.door .small { font-size: 14px; margin: 28px 0 0; }
+.door .small a { color: var(--ink); }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+footer { padding: 24px 0 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="top">
+      <span class="label">Cadence · Tool 01</span>
+      <span class="label">Email and lifecycle</span>
+    </div>
+    <h1>Cadence <span class="serif">Calculator</span></h1>
+    <p class="lede">Every consumable has a tempo: how long one pack lasts in a customer's hands. Enter yours to get a post-purchase email schedule that follows it, from the thank-you to the reorder.</p>
+  </header>
+  <hr>
+
+  <section id="inputs" aria-labelledby="h-inputs">
+    <div class="sec-head"><span class="num">i</span><h2 id="h-inputs">Your product</h2></div>
+    <div class="presets" role="group" aria-label="Illustrative examples">
+      <button type="button" data-preset="incense">Incense, 10 cones</button>
+      <button type="button" data-preset="tea">Loose tea, 30 cups</button>
+      <button type="button" data-preset="candle">Candle, 40 burn hours</button>
+      <button type="button" data-preset="bath">Bath soak, 8 soaks</button>
+    </div>
+    <div class="fields">
+      <div class="field wide">
+        <label class="label" for="name">Product</label>
+        <input id="name" type="text" placeholder="Wind-down cones" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="label" for="uses">Uses per pack</label>
+        <input id="uses" type="number" min="1" step="1" inputmode="numeric">
+        <div class="hint">Cones, cups, burn hours, soaks</div>
+      </div>
+      <div class="field">
+        <label class="label" for="week">Uses per week</label>
+        <input id="week" type="number" min="0.5" step="0.5" inputmode="decimal">
+        <div class="hint">For a typical regular customer</div>
+      </div>
+      <div class="field">
+        <label class="label" for="ship">Days to doorstep</label>
+        <input id="ship" type="number" min="0" step="1" inputmode="numeric">
+        <div class="hint">From order placed to delivered</div>
+      </div>
+      <div class="field">
+        <label class="label" for="price">Price per pack <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input id="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="18">
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="h-tempo">
+    <div class="sec-head"><span class="num">ii</span><h2 id="h-tempo">The tempo</h2></div>
+    <div class="figures">
+      <div class="fig">
+        <span class="label">One pack lasts</span>
+        <div class="value"><span id="f-days">–</span><span class="unit">days</span></div>
+        <p>From delivery to the last use.</p>
+      </div>
+      <div class="fig">
+        <span class="label">Order by</span>
+        <div class="value"><span id="f-order">–</span><span class="unit">days in</span></div>
+        <p>Days after the first order, so the next pack lands before this one runs out.</p>
+      </div>
+      <div class="fig">
+        <span class="label">Packs a year</span>
+        <div class="value"><span id="f-year">–</span><span class="unit">per regular</span></div>
+        <p id="f-year-note">At this pace, for one customer.</p>
+      </div>
+    </div>
+    <p class="note" id="fast-note" hidden></p>
+  </section>
+  <hr>
+
+  <section aria-labelledby="h-line">
+    <div class="sec-head"><span class="num">iii</span><h2 id="h-line">The timeline</h2></div>
+    <div class="timeline" id="timeline" role="img" aria-label="Timeline of emails from order to reorder"></div>
+    <div class="legend">
+      <span class="afterglow">Afterglow</span>
+      <span class="tempo">Tempo</span>
+      <span class="rest">Rest</span>
+      <em>Filled: asks for an order</em>
+      <em>Shaded band: the pack is in use</em>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="h-sched">
+    <div class="sec-head"><span class="num">iv</span><h2 id="h-sched">The schedule</h2></div>
+    <table class="sched">
+      <thead><tr><th></th><th>Day</th><th>Wait</th><th>Layer</th><th>Email</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="summary" id="summary"></p>
+    <div class="actions">
+      <button class="btn" type="button" id="copy">Copy as flow delays</button>
+      <button class="btn ghost" type="button" id="share">Copy link to these numbers</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="h-method">
+    <div class="sec-head"><span class="num">v</span><h2 id="h-method">How it's worked out</h2></div>
+    <div class="method">
+      <div><h3>Days to empty</h3><p>Uses per pack, divided by uses per week, times seven. The clock starts when the pack arrives.</p></div>
+      <div><h3>Order by</h3><p>The day the pack runs out, minus shipping time, minus a two-day margin. Ordered by then, the next pack arrives before the last use.</p></div>
+      <div><h3>Reorder window</h3><p>Opens about a quarter of the pack's life before the order-by day (between 3 and 10 days). Longer windows get a reminder in the middle.</p></div>
+      <div><h3>Spacing</h3><p>No two emails land within two days of each other. When a short tempo crowds the schedule, the lower-priority email is the one that drops.</p></div>
+      <div><h3>Afterglow, tempo, rest</h3><p>Afterglow emails follow the purchase and ask for nothing. Tempo emails follow the pack running down. Rest is the one quiet note after it runs out.</p></div>
+      <div><h3>Your real numbers</h3><p>The examples are illustrative. Replace them with what your customers actually do: reviews and support replies often mention how fast a pack goes.</p></div>
+    </div>
+  </section>
+  <hr>
+
+  <section class="door" aria-labelledby="h-door">
+    <span class="label">The Second-Order System</span>
+    <h2 id="h-door" style="margin-top:14px">Have this schedule built, <span class="serif">timed to your product.</span></h2>
+    <p>Every email above, written for your product, set to its tempo in Omnisend or Klaviyo, checked before anything goes live, and handed over working. Send your store and I'll reply with scope and fee.</p>
+    <form class="start" method="POST" action="https://formspree.io/f/FORMSPREE_ID" id="start">
+      <input type="hidden" name="_subject" value="Cadence: a founder sent their numbers">
+      <p class="hp"><label>Leave this empty <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
+      <div class="fields">
+        <div class="field">
+          <label class="label" for="f-name">Your name</label>
+          <input id="f-name" name="founder" type="text" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label class="label" for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label class="label" for="f-store">Store URL</label>
+          <input id="f-store" name="store" type="url" required placeholder="https://" autocomplete="url">
+        </div>
+      </div>
+      <input type="hidden" name="product">
+      <input type="hidden" name="uses_per_pack">
+      <input type="hidden" name="uses_per_week">
+      <input type="hidden" name="days_to_doorstep">
+      <input type="hidden" name="price_per_pack">
+      <input type="hidden" name="schedule">
+      <input type="hidden" name="link">
+      <div class="actions">
+        <button class="btn" type="submit">Send my numbers</button>
+        <span class="status" id="form-status" aria-live="polite">Your calculator numbers are sent with it.</span>
+      </div>
+    </form>
+    <p class="thanks" id="thanks" hidden>Sent. I have your numbers and your store, and I'll reply by email with scope and fee.</p>
+    <p class="small">Want to see more first? <a href="https://khariangel.framer.website/">See the work</a>.</p>
+  </section>
+  <hr>
+
+  <footer>
+    <span class="label">Cadence · Khari Angel</span>
+    <span class="label">Growth strategist · Los Angeles</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var PRESETS = {
+    incense: { name: "Incense cones", uses: 10, week: 4, ship: 5, price: 18 },
+    tea:     { name: "Loose-leaf tea", uses: 30, week: 7, ship: 5, price: "" },
+    candle:  { name: "Candle", uses: 40, week: 6, ship: 5, price: "" },
+    bath:    { name: "Bath soak", uses: 8, week: 2, ship: 5, price: "" }
+  };
+  var LAYER_LABEL = { afterglow: "Afterglow", tempo: "Tempo", rest: "Rest" };
+  var $ = function (id) { return document.getElementById(id); };
+  var fields = ["name", "uses", "week", "ship", "price"];
+
+  function num(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : NaN; }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function fmt(n, d) { return Number(n.toFixed(d || 0)).toLocaleString("en-US"); }
+
+  function setInputs(p) {
+    fields.forEach(function (f) { if (p[f] !== undefined) $(f).value = p[f]; });
+  }
+
+  function readHash() {
+    var h = location.hash.replace(/^#/, "");
+    if (!h) return null;
+    var out = {};
+    h.split("&").forEach(function (kv) {
+      var parts = kv.split("=");
+      if (fields.indexOf(parts[0]) > -1) out[parts[0]] = decodeURIComponent(parts[1] || "");
+    });
+    return Object.keys(out).length ? out : null;
+  }
+  function hashFor() {
+    return fields.map(function (f) { return f + "=" + encodeURIComponent($(f).value); }).join("&");
+  }
+
+  function compute() {
+    var U = num("uses"), W = num("week"), S = num("ship");
+    if (!(U > 0) || !(W > 0) || !(S >= 0)) return null;
+    S = Math.round(S);
+    var D = U / W * 7;                       // days a pack lasts
+    var E = S + D;                           // day it runs out, counted from the order
+    var tooFast = (D - 2) < S + 2;           // can't reorder after delivery and still arrive in time
+    var orderBy = Math.round(E - S - 2);
+    if (orderBy < S + 2) orderBy = S + 2;
+    var windowLen = clamp(Math.round(D * 0.25), 3, 10);
+    var open = orderBy - windowLen;
+    var nudge = windowLen >= 6 ? orderBy - Math.round(windowLen / 2) : null;
+    var checkin = S + clamp(Math.round(D * 0.25), 3, 7);
+    var mid = Math.round((checkin + open) / 2);
+    var quiet = Math.round(E + 10);
+
+    // priority order decides who stays when two land within two days
+    var cand = [
+      { key: "thanks", day: 0, layer: "afterglow", ask: false, name: "Thank you", why: "Confirms the order and says what happens next. Often the store's order confirmation." },
+      { key: "howto", day: S, layer: "afterglow", ask: false, name: "How to use it", why: "Lands with the package: the first use, step by step." },
+      { key: "last", day: orderBy, layer: "tempo", ask: true, name: "Last call", why: "Order today and the next pack arrives before the last one runs out." },
+      { key: "open", day: open, layer: "tempo", ask: true, name: "Reorder opens", why: "How much is likely left, and a one-click way to reorder." },
+      { key: "checkin", day: checkin, layer: "afterglow", ask: false, name: "First-week check-in", why: "Asks how the first uses went. Invites a reply." },
+      { key: "nudge", day: nudge, layer: "tempo", ask: true, name: "Reminder", why: "The order-by date, stated plainly." },
+      { key: "mid", day: mid, layer: "tempo", ask: false, name: "Midpoint", why: "The maker, the batch, what to pair it with. No sell." },
+      { key: "quiet", day: quiet, layer: "rest", ask: false, name: "Quiet check-in", why: "For anyone who didn't reorder: one question, no offer." }
+    ];
+    var kept = [];
+    cand.forEach(function (c) {
+      if (c.day === null || !isFinite(c.day) || c.day < 0) return;
+      if (c.key === "open" && c.day <= S) return;
+      if (c.key === "mid" && (c.day <= checkin || c.day >= open)) return;
+      var clash = kept.some(function (k) { return Math.abs(k.day - c.day) < 2; });
+      if (!clash) kept.push(c);
+    });
+    kept.sort(function (a, b) { return a.day - b.day; });
+    return { U: U, W: W, S: S, D: D, E: E, orderBy: orderBy, emails: kept, tooFast: tooFast, quiet: quiet };
+  }
+
+  function render() {
+    var r = compute();
+    var price = num("price");
+    if (!r) {
+      ["f-days", "f-order", "f-year"].forEach(function (id) { $(id).textContent = "–"; });
+      $("rows").innerHTML = ""; $("timeline").innerHTML = ""; $("summary").textContent = "";
+      return;
+    }
+    $("f-days").textContent = fmt(r.D, r.D < 10 ? 1 : 0);
+    $("f-order").textContent = r.orderBy;
+    var perYear = 365 / r.D;
+    $("f-year").textContent = fmt(perYear, perYear < 10 ? 1 : 0);
+    $("f-year-note").textContent = price > 0
+      ? "At this pace, $" + fmt(perYear * price) + " a year from one customer who keeps it up."
+      : "At this pace, for one customer.";
+
+    var note = $("fast-note");
+    if (r.tooFast) {
+      note.hidden = false;
+      note.textContent = "A pack runs out about as fast as shipping can replace it. A subscription or a larger pack fits this tempo better than reorder emails; the schedule below is the tightest version that still works.";
+    } else { note.hidden = true; }
+
+    // table
+    var rows = "", prev = null;
+    r.emails.forEach(function (e, i) {
+      var wait = prev === null ? "At once" : (e.day - prev) + (e.day - prev === 1 ? " day" : " days");
+      rows += "<tr>" +
+        "<td class='n'>" + (i + 1) + "</td>" +
+        "<td class='day'>Day " + e.day + "</td>" +
+        "<td class='delay'>" + wait + "</td>" +
+        "<td class='layer-cell'><span class='layer " + e.layer + "'>" + LAYER_LABEL[e.layer] + "</span></td>" +
+        "<td class='what'><div class='name'>" + e.name + (e.ask ? "<span class='ask'>Asks</span>" : "") + "</div><div class='why'>" + e.why + "</div></td>" +
+        "</tr>";
+      prev = e.day;
+    });
+    $("rows").innerHTML = rows;
+    var asks = r.emails.filter(function (e) { return e.ask; }).length;
+    $("summary").textContent = r.emails.length + " emails across " + r.emails[r.emails.length - 1].day + " days. " +
+      asks + " of them ask for an order; the rest give something.";
+
+    drawTimeline(r);
+  }
+
+  function drawTimeline(r) {
+    var css = getComputedStyle(document.documentElement);
+    var c = function (v) { return css.getPropertyValue(v).trim(); };
+    var W = Math.max(300, Math.round($("timeline").clientWidth || 900)), H = 190, padL = 18, padR = 18, axisY = 112;
+    var maxDay = r.quiet + 3;
+    var x = function (d) { return padL + (d / maxDay) * (W - padL - padR); };
+    var s = "<svg viewBox='0 0 " + W + " " + H + "' xmlns='http://www.w3.org/2000/svg' font-family='Hanken Grotesk, system-ui, sans-serif'>";
+    // in-use band
+    s += "<rect x='" + x(r.S) + "' y='" + (axisY - 16) + "' width='" + (x(r.E) - x(r.S)) + "' height='32' fill='" + c("--band") + "'/>";
+    // axis
+    s += "<line x1='" + padL + "' x2='" + (W - padR) + "' y1='" + axisY + "' y2='" + axisY + "' stroke='" + c("--ink") + "' stroke-width='1'/>";
+    // weekly ticks
+    var weeksPerLabel = Math.max(1, Math.ceil(40 / ((W - padL - padR) / maxDay * 7)));
+    for (var d = 0; d <= maxDay; d += 7) {
+      if ((d / 7) % weeksPerLabel !== 0) continue;
+      s += "<line x1='" + x(d) + "' x2='" + x(d) + "' y1='" + axisY + "' y2='" + (axisY + 6) + "' stroke='" + c("--muted") + "'/>";
+      s += "<text x='" + x(d) + "' y='" + (axisY + 24) + "' font-size='12' fill='" + c("--muted") + "' text-anchor='middle'>" + (d === 0 ? "Order" : "wk " + d / 7) + "</text>";
+    }
+    // milestones
+    var ms = [
+      { d: r.S, t: "Delivered" },
+      { d: r.E, t: "Runs out" }
+    ];
+    ms.forEach(function (m, i) {
+      var anchor = x(m.d) < 70 ? "start" : (x(m.d) > W - 70 ? "end" : "middle");
+      s += "<line x1='" + x(m.d) + "' x2='" + x(m.d) + "' y1='" + (axisY + 30) + "' y2='" + (axisY + 44) + "' stroke='" + c("--muted") + "'/>";
+      s += "<text x='" + x(m.d) + "' y='" + (axisY + 60) + "' font-size='13' font-style='italic' font-family='Instrument Serif, Georgia, serif' fill='" + c("--ink") + "' text-anchor='" + anchor + "'>" + m.t + " · day " + Math.round(m.d) + "</text>";
+    });
+    // emails
+    r.emails.forEach(function (e, i) {
+      var col = c("--" + e.layer);
+      var up = i % 2 === 0;
+      var y = up ? 40 : 66;
+      s += "<line x1='" + x(e.day) + "' x2='" + x(e.day) + "' y1='" + (y + 11) + "' y2='" + axisY + "' stroke='" + col + "' stroke-width='1'/>";
+      s += "<circle cx='" + x(e.day) + "' cy='" + y + "' r='11' fill='" + (e.ask ? col : c("--bg")) + "' stroke='" + col + "' stroke-width='1.5'/>";
+      s += "<text x='" + x(e.day) + "' y='" + (y + 4.5) + "' font-size='12' font-weight='600' text-anchor='middle' fill='" + (e.ask ? c("--bg") : col) + "'>" + (i + 1) + "</text>";
+    });
+    s += "</svg>";
+    $("timeline").innerHTML = s;
+  }
+
+  function flowText() {
+    var r = compute(); if (!r) return "";
+    var name = $("name").value.trim() || "Product";
+    var lines = ["Cadence schedule: " + name, "Trigger: order placed", "Pack lasts about " + fmt(r.D, 1) + " days; order-by day " + r.orderBy, ""];
+    var prev = null;
+    r.emails.forEach(function (e, i) {
+      var wait = prev === null ? "Send at once" : "Wait " + (e.day - prev) + (e.day - prev === 1 ? " day" : " days");
+      lines.push((i + 1) + ". " + wait + ", then send: " + e.name + " (day " + e.day + ", " + LAYER_LABEL[e.layer].toLowerCase() + (e.ask ? ", asks for an order" : "") + ")");
+      lines.push("   " + e.why);
+      prev = e.day;
+    });
+    lines.push("", "Exit the flow when the customer places a new order.");
+    return lines.join("\n");
+  }
+
+  function copy(text, msg) {
+    var done = function () { $("status").textContent = msg; setTimeout(function () { $("status").textContent = ""; }, 2400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+    } else { fallback(text); done(); }
+  }
+  function fallback(text) {
+    var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  document.querySelectorAll("[data-preset]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      setInputs(PRESETS[b.dataset.preset]);
+      document.querySelectorAll("[data-preset]").forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+      render();
+    });
+  });
+  fields.forEach(function (f) {
+    $(f).addEventListener("input", function () {
+      document.querySelectorAll("[data-preset]").forEach(function (o) { o.setAttribute("aria-pressed", "false"); });
+      render();
+    });
+  });
+  $("copy").addEventListener("click", function () { copy(flowText(), "Copied. Paste it into your flow notes."); });
+  $("share").addEventListener("click", function () {
+    var url = location.href.split("#")[0] + "#" + hashFor();
+    history.replaceState(null, "", url);
+    copy(url, "Link copied.");
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", render);
+  }
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(render, 120); });
+
+  $("start").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var form = ev.target;
+    form.product.value = $("name").value;
+    form.uses_per_pack.value = $("uses").value;
+    form.uses_per_week.value = $("week").value;
+    form.days_to_doorstep.value = $("ship").value;
+    form.price_per_pack.value = $("price").value;
+    form.schedule.value = flowText();
+    form.link.value = location.href.split("#")[0] + "#" + hashFor();
+    var btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+    $("form-status").textContent = "Sending…";
+    fetch(form.action, {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: new FormData(form)
+    }).then(function (res) {
+      if (!res.ok) throw new Error(res.status);
+      form.hidden = true;
+      $("thanks").hidden = false;
+    }).catch(function () {
+      btn.disabled = false;
+      $("form-status").textContent = "That didn't go through. Try again in a moment.";
+    });
+  });
+
+  var fromHash = readHash();
+  if (fromHash) { setInputs(fromHash); }
+  else {
+    setInputs(PRESETS.incense);
+    document.querySelector("[data-preset='incense']").setAttribute("aria-pressed", "true");
+  }
+  render();
+})();
+</script>
+</body>
+</html>
