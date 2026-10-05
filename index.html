@@ -7,119 +7,143 @@
 <meta name="description" content="Enter how long a pack of your product lasts, and get a post-purchase email schedule timed to it, from the thank-you to the reorder.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f2eee6;
-  --panel: #f8f5ef;
-  --ink: #1d1c19;
-  --muted: #6c675e;
-  --rule: #d3ccbf;
-  --field: #fffdf9;
-  --afterglow: #a65a24;
-  --tempo: #46633f;
-  --rest: #5f6a78;
-  --band: #e4ddcf;
-  --grain-opacity: .07;
+  --bg: #e6e8dc;          /* the desk */
+  --paper: #f3f2e8;       /* the form */
+  --ink: #15161c;
+  --muted: #5d6157;
+  --rule: #b9bcaa;        /* printed form lines */
+  --rule-soft: #d8d9cb;
+  --signal: #1d34e8;      /* Tool 01 colour: electric blue */
+  --signal-ink: #f3f2e8;
+  --afterglow: #e5482a;   /* the flower's red-orange */
+  --tempo: #1d34e8;
+  --rest: #6f7468;
+  --band: #d9ddf7;
+  --grain-opacity: .10;
+  --stars: none;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #141310;
-    --panel: #1b1a16;
-    --ink: #ece6db;
-    --muted: #9d968a;
-    --rule: #37342d;
-    --field: #22201b;
-    --afterglow: #d9925a;
-    --tempo: #8fb184;
-    --rest: #9aa6b6;
-    --band: #2b2922;
-    --grain-opacity: .09;
+    --bg: #070a1f; --paper: #0d1230; --ink: #eceadf; --muted: #9298b3; --rule: #2b3260; --rule-soft: #1c2249;
+    --signal: #7d8cff; --signal-ink: #070a1f; --afterglow: #ff7a5c; --tempo: #7d8cff; --rest: #8b90a8; --band: #1b2256;
+    --grain-opacity: .08; --stars: block;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #141310; --panel: #1b1a16; --ink: #ece6db; --muted: #9d968a; --rule: #37342d;
-  --field: #22201b; --afterglow: #d9925a; --tempo: #8fb184; --rest: #9aa6b6; --band: #2b2922; --grain-opacity: .09;
+  --bg: #070a1f; --paper: #0d1230; --ink: #eceadf; --muted: #9298b3; --rule: #2b3260; --rule-soft: #1c2249;
+  --signal: #7d8cff; --signal-ink: #070a1f; --afterglow: #ff7a5c; --tempo: #7d8cff; --rest: #8b90a8; --band: #1b2256;
+  --grain-opacity: .08; --stars: block;
 }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 400 16px/1.55 "Hanken Grotesk", system-ui, sans-serif;
-  letter-spacing: -0.005em;
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.5 "Archivo", system-ui, sans-serif; font-stretch: 100%;
 }
-body::before {
-  content: "";
-  position: fixed; inset: 0;
-  pointer-events: none;
-  opacity: var(--grain-opacity);
+body::before { /* paper grain */
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 10; opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  z-index: 10;
 }
-.wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
-@media (min-width: 720px) { .wrap { padding: 0 32px; } }
+body::after { /* night sky, dark mode only */
+  content: ""; display: var(--stars); position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1.4px 1.4px at 8% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 22% 68%, #cfd5ff 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 91% 9%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 76% 44%, #cfd5ff 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 96% 82%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 3% 91%, #cfd5ff 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 52% 3%, #fff 50%, transparent 51%);
+}
 
-.label {
-  font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+.desk { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 24px 16px 48px; }
+@media (min-width: 720px) { .desk { padding: 48px 32px 72px; } }
+
+.sheet {
+  background: var(--paper); border: 1px solid var(--rule);
+  box-shadow: 0 1px 0 var(--rule-soft), 0 18px 40px -28px rgba(0,0,0,.35);
 }
+
+.label { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-stretch: 112%; }
 .serif { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
-hr { border: 0; border-top: 1px solid var(--rule); margin: 0; }
 
-header { padding: 56px 0 40px; }
-header .top-right { display: flex; align-items: baseline; gap: 16px; }
-header .top .label { white-space: nowrap; }
-@media (max-width: 560px) { header .top-right .label { display: none; } }
-.theme { font: inherit; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+/* masthead */
+.mast-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); }
+@media (min-width: 720px) { .mast-top { padding: 12px 28px; } }
+.mast-top .mid { flex: 1; text-align: center; }
+@media (max-width: 600px) { .mast-top .mid { display: none; } }
+.theme { font: inherit; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; font-stretch: 112%;
+  color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 0; padding: 4px 10px; cursor: pointer; }
 .theme:hover { border-color: var(--ink); }
-header .top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 48px; }
-h1 {
-  font-weight: 500; font-size: clamp(40px, 8vw, 76px); line-height: .98; letter-spacing: -0.035em; margin: 0 0 20px;
-}
-h1 .serif { font-size: 1.08em; }
-.lede { max-width: 560px; font-size: 18px; color: var(--muted); margin: 0; }
 
-section { padding: 40px 0; }
-.sec-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 24px; }
-.sec-head .num { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 22px; color: var(--muted); min-width: 28px; }
-h2 { font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin: 0; }
+.mast { display: grid; grid-template-columns: minmax(0,1fr); border-bottom: 2px solid var(--ink); }
+@media (min-width: 820px) { .mast { grid-template-columns: minmax(0,1fr) 260px; } }
+.mast .title { padding: 28px 16px 24px; }
+@media (min-width: 720px) { .mast .title { padding: 40px 28px 32px; } }
+.no { display: inline-block; font-weight: 700; font-size: 13px; letter-spacing: .06em; color: var(--signal-ink); background: var(--signal); padding: 3px 8px 2px; margin-bottom: 18px; font-stretch: 112%; }
+h1 { margin: 0 0 0 -2px; font-weight: 900; font-stretch: 68%; text-transform: uppercase; line-height: .86; letter-spacing: -0.01em; font-size: clamp(40px, 13.5vw, 128px); overflow-wrap: anywhere; }
+h1 .row2 { display: block; color: var(--signal); }
+.lede { max-width: 540px; margin: 22px 0 0; font-size: 17px; color: var(--muted); }
+.mast .index { border-top: 1px solid var(--rule); padding: 16px; display: grid; gap: 10px; align-content: end; }
+@media (min-width: 820px) { .mast .index { border-top: 0; border-left: 1px solid var(--rule); padding: 28px; } }
+.mast .index div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--rule-soft); padding-bottom: 6px; font-size: 14px; }
+.mast .index div:last-child { border-bottom: 0; }
+.mast .index b { font-weight: 600; }
 
-/* inputs */
-.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.presets button {
-  font: inherit; font-size: 14px; color: var(--ink); background: transparent;
-  border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; cursor: pointer;
-}
-.presets button:hover, .presets button[aria-pressed="true"] { border-color: var(--ink); }
-.fields { display: grid; grid-template-columns: 1fr; gap: 16px 24px; }
-@media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 900px) { .fields { grid-template-columns: repeat(3, 1fr); } }
-.field label { display: block; margin-bottom: 6px; }
-.field .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.field input {
-  width: 100%; font: inherit; font-size: 20px; color: var(--ink);
-  background: var(--field); border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px;
-}
-.field input:focus { outline: none; border-color: var(--ink); }
-.field.wide { grid-column: 1 / -1; }
-@media (min-width: 900px) { .field.wide { grid-column: span 1; } }
+/* section heads, like printed form headers */
+.bar { display: flex; align-items: baseline; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--ink); background: var(--rule-soft); }
+@media (min-width: 720px) { .bar { padding: 9px 28px; } }
+.bar .n { font-weight: 800; font-size: 12px; font-stretch: 112%; color: var(--signal); }
+.bar h2 { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; font-stretch: 112%; }
+.bar .aside { margin-left: auto; }
 
-/* tempo figures */
-.figures { display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--rule); }
-@media (min-width: 720px) { .figures { grid-template-columns: repeat(3, 1fr); } }
-.fig { padding: 24px 0; border-bottom: 1px solid var(--rule); }
-@media (min-width: 720px) {
-  .fig { padding: 28px 24px; border-bottom: 0; border-left: 1px solid var(--rule); }
-  .fig:first-child { border-left: 0; padding-left: 0; }
+/* slip + tempo, side by side */
+.work { display: grid; grid-template-columns: minmax(0,1fr); }
+@media (min-width: 900px) { .work { grid-template-columns: 1.05fr 1fr; } .work > .tempo-col { border-left: 1px solid var(--ink); } }
+.pad { padding: 18px 16px 24px; }
+@media (min-width: 720px) { .pad { padding: 22px 28px 28px; } }
+
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.presets button { font: inherit; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 0; padding: 5px 10px; cursor: pointer; }
+.presets button:hover { border-color: var(--ink); }
+.presets button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ruled entry lines */
+.lines { border-top: 1px solid var(--rule); }
+.line { display: grid; grid-template-columns: 38% 1fr; border-bottom: 1px solid var(--rule); min-height: 54px; }
+.line label { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 8px 12px 8px 0; border-right: 1px solid var(--rule-soft); }
+.line .hint { font-size: 12px; color: var(--muted); font-stretch: 100%; letter-spacing: 0; text-transform: none; font-weight: 400; }
+.line input {
+  width: 100%; border: 0; background: transparent; color: var(--signal); padding: 8px 0 8px 14px;
+  font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 26px; line-height: 1.1;
 }
-.fig .value { font-size: 56px; font-weight: 500; letter-spacing: -0.04em; line-height: 1; margin: 10px 0 8px; }
-.fig .value .unit { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 26px; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
-.fig p { margin: 0; font-size: 14px; color: var(--muted); }
-.note {
-  margin-top: 20px; padding: 14px 16px; border-left: 2px solid var(--afterglow); background: var(--panel); font-size: 15px;
+.line input::placeholder { color: var(--rule); }
+.line input:focus { outline: none; background: var(--band); }
+
+/* tempo, the hero */
+.stamp-wrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.stamp {
+  width: 170px; height: 170px; border-radius: 50%; border: 3px solid var(--signal); color: var(--signal);
+  display: grid; place-content: center; text-align: center; transform: rotate(-8deg); flex: none;
+  box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 6px var(--signal);
 }
+.stamp .k { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; font-stretch: 112%; }
+.stamp .v { font-weight: 900; font-stretch: 68%; font-size: 76px; line-height: .9; margin: 4px 0 0; }
+.stamp-copy { flex: 1; min-width: 180px; }
+.stamp-copy p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.stamp-copy .big { font-size: 22px; color: var(--ink); line-height: 1.2; margin-top: 8px; }
+
+.figures { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); margin-top: 22px; }
+.fig { padding: 14px 0 0; }
+.fig + .fig { border-left: 1px solid var(--rule-soft); padding-left: 16px; }
+.fig .value { font-weight: 900; font-stretch: 68%; font-size: 52px; line-height: 1; margin: 6px 0 4px; }
+.fig .value .unit { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 20px; color: var(--muted); margin-left: 4px; }
+.fig p { margin: 0; font-size: 13px; color: var(--muted); }
+.note { margin: 18px 0 0; padding: 10px 12px; border: 1px dashed var(--afterglow); font-size: 14px; }
 .note[hidden] { display: none; }
 
 /* timeline */
@@ -127,172 +151,196 @@ h2 { font-weight: 500; font-size: 26px; letter-spacing: -0.02em; margin: 0; }
 .timeline svg { display: block; width: 100%; height: auto; }
 .timeline .mv { transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .3s ease; }
 @media (prefers-reduced-motion: reduce) { .timeline .mv { transition: none; } }
-.legend { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; font-size: 14px; color: var(--muted); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; background: currentColor; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; background: currentColor; }
 .legend .afterglow { color: var(--afterglow); }
 .legend .tempo { color: var(--tempo); }
 .legend .rest { color: var(--rest); }
-.legend em { color: var(--muted); font-style: normal; }
+.legend em { font-style: normal; }
 
-/* schedule */
+/* schedule as a ledger */
 .sched { width: 100%; border-collapse: collapse; font-size: 15px; }
-.sched th { text-align: left; font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 0 12px 10px 0; border-bottom: 1px solid var(--ink); }
-.sched td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.sched td.n { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-size: 20px; color: var(--muted); width: 32px; }
-.sched td.day { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
+.sched th { text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; font-stretch: 112%; color: var(--muted);
+  padding: 0 12px 8px 0; border-bottom: 1px solid var(--ink); }
+.sched td { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.sched td + td, .sched th + th { border-left: 1px solid var(--rule-soft); padding-left: 12px; }
+.sched td.n { font-weight: 900; font-stretch: 68%; font-size: 26px; line-height: 1; color: var(--signal); width: 40px; }
+.sched td.day { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
 .sched td.delay { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
-.sched .name { font-weight: 500; }
+.sched .name { font-weight: 600; }
 .sched .why { color: var(--muted); font-size: 14px; margin-top: 2px; }
-.layer { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.layer { font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; font-stretch: 112%; white-space: nowrap; }
 .layer.afterglow { color: var(--afterglow); }
 .layer.tempo { color: var(--tempo); }
 .layer.rest { color: var(--rest); }
-.ask { display: inline-block; margin-left: 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; }
+.ask { display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--signal-ink); background: var(--signal); padding: 1px 6px; vertical-align: 2px; }
 @media (max-width: 639px) {
   .sched thead { display: none; }
-  .sched tr { display: grid; grid-template-columns: 32px 1fr auto; column-gap: 8px; border-bottom: 1px solid var(--rule); padding: 12px 0; }
-  .sched td { border: 0; padding: 0; }
+  .sched tr { display: grid; grid-template-columns: 36px 1fr auto; column-gap: 8px; border-bottom: 1px solid var(--rule); padding: 12px 0; }
+  .sched td, .sched td + td { border: 0; padding: 0; }
   .sched td.n { grid-row: 1 / span 3; }
   .sched td.day { grid-column: 2; }
   .sched td.delay { grid-column: 3; text-align: right; }
   .sched td.layer-cell { grid-column: 2 / span 2; margin: 2px 0 4px; }
   .sched td.what { grid-column: 2 / span 2; }
 }
-.summary { margin: 16px 0 0; color: var(--muted); font-size: 14px; }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: center; }
-.btn {
-  font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
-  background: var(--ink); color: var(--bg); border: 1px solid var(--ink); border-radius: 2px; padding: 10px 18px;
-}
-.btn.ghost { background: transparent; color: var(--ink); }
+.summary { margin: 14px 0 0; color: var(--muted); font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; align-items: center; }
+.btn { font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-stretch: 112%; cursor: pointer;
+  background: var(--signal); color: var(--signal-ink); border: 1px solid var(--signal); border-radius: 0; padding: 11px 16px; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn[disabled] { opacity: .5; cursor: default; }
 .status { font-size: 14px; color: var(--muted); }
 
-/* method */
-.method { display: grid; grid-template-columns: 1fr; gap: 20px 40px; }
-@media (min-width: 720px) { .method { grid-template-columns: 1fr 1fr; } }
-.method h3 { font-weight: 500; font-size: 16px; margin: 0 0 4px; }
-.method p { margin: 0; color: var(--muted); font-size: 15px; }
+/* method, folded */
+details.method > summary { list-style: none; cursor: pointer; }
+details.method > summary::-webkit-details-marker { display: none; }
+details.method > summary .aside::after { content: "Open +"; }
+details.method[open] > summary .aside::after { content: "Close −"; }
+.method-grid { display: grid; grid-template-columns: 1fr; gap: 16px 36px; }
+@media (min-width: 720px) { .method-grid { grid-template-columns: 1fr 1fr; } }
+.method-grid h3 { font-weight: 700; font-size: 15px; margin: 0 0 2px; }
+.method-grid p { margin: 0; color: var(--muted); font-size: 14px; }
 
-/* front door */
-.door { padding: 64px 0 48px; }
-.door h2 { font-size: clamp(30px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.03em; max-width: 680px; }
-.door p { max-width: 560px; color: var(--muted); font-size: 17px; margin: 18px 0 28px; }
-.door .start { max-width: 860px; }
-.door .start .fields { margin-top: 8px; }
+/* the tear-off slip */
+.tear { position: relative; height: 0; border-top: 1.5px dashed var(--ink); margin: 0; }
+.tear span { position: absolute; left: 16px; top: -11px; background: var(--paper); padding: 0 8px; font-size: 15px; }
+@media (min-width: 720px) { .tear span { left: 28px; } }
+.door h2 { font-weight: 900; font-stretch: 68%; text-transform: uppercase; font-size: clamp(34px, 6vw, 58px); line-height: .9; margin: 10px 0 0; max-width: 720px; }
+.door h2 .serif { text-transform: none; font-size: .78em; color: var(--signal); }
+.door .lede { margin-top: 14px; }
+.door .lines { margin-top: 20px; max-width: 720px; }
 .door .hp { position: absolute; left: -9999px; }
-.door .thanks { color: var(--ink); font-size: 18px; border-left: 2px solid var(--tempo); padding-left: 14px; }
+.door .thanks { color: var(--ink); font-size: 18px; border: 1px solid var(--signal); padding: 12px 14px; max-width: 720px; }
 .door .thanks[hidden] { display: none; }
-.door .small { font-size: 14px; margin: 28px 0 0; }
+.door .small { font-size: 14px; margin: 22px 0 0; color: var(--muted); }
 .door .small a { color: var(--ink); }
-.btn[disabled] { opacity: .5; cursor: default; }
 
-footer { padding: 24px 0 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer.colophon { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 2px solid var(--ink); }
+@media (min-width: 720px) { footer.colophon { padding: 12px 28px; } }
 </style>
 </head>
 <body>
+<div class="desk">
+<main class="sheet">
 
-<div class="wrap">
-  <header>
-    <div class="top">
-      <span class="label">Cadence · Tool 01</span>
-      <span class="top-right"><span class="label">Email and lifecycle</span>
-        <button type="button" class="theme" id="theme" aria-label="Switch to dark mode">Dark</button></span>
+  <div class="mast-top">
+    <span class="label">Catalogue · Email and lifecycle</span>
+    <span class="label mid">Khari Angel · Los Angeles</span>
+    <button type="button" class="theme" id="theme" aria-label="Switch to dark mode">Night</button>
+  </div>
+
+  <header class="mast">
+    <div class="title">
+      <h1>Cadence <span class="row2">Calculator</span></h1>
+      <p class="lede">Every consumable keeps time: how long one pack lasts in a customer's hands. Fill in the slip and get a post-purchase email schedule that follows it, from the thank-you to the reorder.</p>
     </div>
-    <h1>Cadence <span class="serif">Calculator</span></h1>
-    <p class="lede">Every consumable has a tempo: how long one pack lasts in a customer's hands. Enter yours to get a post-purchase email schedule that follows it, from the thank-you to the reorder.</p>
+    <div class="index" aria-label="What this tool does">
+      <div><span class="label">In</span><b>4 numbers</b></div>
+      <div><span class="label">Out</span><b>Tempo + schedule</b></div>
+      <div><span class="label">Paste into</span><b>Your email platform</b></div>
+      <div><span class="label">Time</span><b>About a minute</b></div>
+    </div>
   </header>
-  <hr>
 
-  <section id="inputs" aria-labelledby="h-inputs">
-    <div class="sec-head"><span class="num">i</span><h2 id="h-inputs">Your product</h2></div>
-    <div class="presets" role="group" aria-label="Illustrative examples">
-      <button type="button" data-preset="incense">Incense, 10 cones</button>
-      <button type="button" data-preset="tea">Loose tea, 30 cups</button>
-      <button type="button" data-preset="candle">Candle, 40 burn hours</button>
-      <button type="button" data-preset="bath">Bath soak, 8 soaks</button>
-    </div>
-    <div class="fields">
-      <div class="field wide">
-        <label class="label" for="name">Product</label>
-        <input id="name" type="text" placeholder="Wind-down cones" autocomplete="off">
+  <div class="work">
+    <section aria-labelledby="h-inputs">
+      <div class="bar"><span class="n">i</span><h2 id="h-inputs">The slip</h2></div>
+      <div class="pad">
+        <div class="presets" role="group" aria-label="Illustrative examples">
+          <button type="button" data-preset="incense">Incense, 10 cones</button>
+          <button type="button" data-preset="tea">Loose tea, 30 cups</button>
+          <button type="button" data-preset="candle">Candle, 40 hours</button>
+          <button type="button" data-preset="bath">Bath soak, 8</button>
+        </div>
+        <div class="lines">
+          <div class="line">
+            <label class="label" for="name">Product</label>
+            <input id="name" type="text" placeholder="Wind-down cones" autocomplete="off">
+          </div>
+          <div class="line">
+            <label class="label" for="uses">Uses per pack <span class="hint">Cones, cups, burn hours, soaks</span></label>
+            <input id="uses" type="number" min="1" step="1" inputmode="numeric">
+          </div>
+          <div class="line">
+            <label class="label" for="week">Uses per week <span class="hint">A typical regular customer</span></label>
+            <input id="week" type="number" min="0.5" step="0.5" inputmode="decimal">
+          </div>
+          <div class="line">
+            <label class="label" for="ship">Days to doorstep <span class="hint">Order placed to delivered</span></label>
+            <input id="ship" type="number" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="line">
+            <label class="label" for="price">Price per pack <span class="hint">Optional</span></label>
+            <input id="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="18">
+          </div>
+        </div>
       </div>
-      <div class="field">
-        <label class="label" for="uses">Uses per pack</label>
-        <input id="uses" type="number" min="1" step="1" inputmode="numeric">
-        <div class="hint">Cones, cups, burn hours, soaks</div>
-      </div>
-      <div class="field">
-        <label class="label" for="week">Uses per week</label>
-        <input id="week" type="number" min="0.5" step="0.5" inputmode="decimal">
-        <div class="hint">For a typical regular customer</div>
-      </div>
-      <div class="field">
-        <label class="label" for="ship">Days to doorstep</label>
-        <input id="ship" type="number" min="0" step="1" inputmode="numeric">
-        <div class="hint">From order placed to delivered</div>
-      </div>
-      <div class="field">
-        <label class="label" for="price">Price per pack <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input id="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="18">
-      </div>
-    </div>
-  </section>
-  <hr>
+    </section>
 
-  <section aria-labelledby="h-tempo">
-    <div class="sec-head"><span class="num">ii</span><h2 id="h-tempo">The tempo</h2></div>
-    <div class="figures">
-      <div class="fig">
-        <span class="label">One pack lasts</span>
-        <div class="value"><span id="f-days">–</span><span class="unit">days</span></div>
-        <p>From delivery to the last use.</p>
+    <section class="tempo-col" aria-labelledby="h-tempo">
+      <div class="bar"><span class="n">ii</span><h2 id="h-tempo">The tempo</h2></div>
+      <div class="pad">
+        <div class="stamp-wrap">
+          <div class="stamp" aria-label="Order-by day">
+            <span class="k">Order by day</span>
+            <span class="v" id="f-order">–</span>
+          </div>
+          <div class="stamp-copy">
+            <span class="label">The one number to remember</span>
+            <p class="big">Ordered by this day after the first order, the next pack lands before the last use.</p>
+          </div>
+        </div>
+        <div class="figures">
+          <div class="fig">
+            <span class="label">One pack lasts</span>
+            <div class="value"><span id="f-days">–</span><span class="unit">days</span></div>
+            <p>From delivery to the last use.</p>
+          </div>
+          <div class="fig">
+            <span class="label">Packs a year</span>
+            <div class="value"><span id="f-year">–</span><span class="unit">per regular</span></div>
+            <p id="f-year-note">At this pace, for one customer.</p>
+          </div>
+        </div>
+        <p class="note" id="fast-note" hidden></p>
       </div>
-      <div class="fig">
-        <span class="label">Order by</span>
-        <div class="value"><span id="f-order">–</span><span class="unit">days in</span></div>
-        <p>Days after the first order, so the next pack lands before this one runs out.</p>
-      </div>
-      <div class="fig">
-        <span class="label">Packs a year</span>
-        <div class="value"><span id="f-year">–</span><span class="unit">per regular</span></div>
-        <p id="f-year-note">At this pace, for one customer.</p>
-      </div>
-    </div>
-    <p class="note" id="fast-note" hidden></p>
-  </section>
-  <hr>
+    </section>
+  </div>
 
   <section aria-labelledby="h-line">
-    <div class="sec-head"><span class="num">iii</span><h2 id="h-line">The timeline</h2></div>
-    <div class="timeline" id="timeline" role="img" aria-label="Timeline of emails from order to reorder"></div>
-    <div class="legend">
-      <span class="afterglow">Afterglow</span>
-      <span class="tempo">Tempo</span>
-      <span class="rest">Rest</span>
-      <em>Filled: asks for an order</em>
-      <em>Shaded band: the pack is in use</em>
+    <div class="bar" style="border-top:1px solid var(--ink)"><span class="n">iii</span><h2 id="h-line">The timeline</h2></div>
+    <div class="pad">
+      <div class="timeline" id="timeline" role="img" aria-label="Timeline of emails from order to reorder"></div>
+      <div class="legend">
+        <span class="afterglow">Afterglow</span>
+        <span class="tempo">Tempo</span>
+        <span class="rest">Rest</span>
+        <em>Filled: asks for an order</em>
+        <em>Shaded band: the pack is in use</em>
+      </div>
     </div>
   </section>
-  <hr>
 
   <section aria-labelledby="h-sched">
-    <div class="sec-head"><span class="num">iv</span><h2 id="h-sched">The schedule</h2></div>
-    <table class="sched">
-      <thead><tr><th></th><th>Day</th><th>Wait</th><th>Layer</th><th>Email</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
-    <p class="summary" id="summary"></p>
-    <div class="actions">
-      <button class="btn" type="button" id="copy">Copy as flow delays</button>
-      <button class="btn ghost" type="button" id="share">Copy link to these numbers</button>
-      <span class="status" id="status" aria-live="polite"></span>
+    <div class="bar" style="border-top:1px solid var(--ink)"><span class="n">iv</span><h2 id="h-sched">The schedule</h2></div>
+    <div class="pad">
+      <table class="sched">
+        <thead><tr><th>Nº</th><th>Day</th><th>Wait</th><th>Layer</th><th>Email</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="summary" id="summary"></p>
+      <div class="actions">
+        <button class="btn" type="button" id="copy">Copy as flow delays</button>
+        <button class="btn ghost" type="button" id="share">Copy link to these numbers</button>
+        <span class="status" id="status" aria-live="polite"></span>
+      </div>
     </div>
   </section>
-  <hr>
 
-  <section aria-labelledby="h-method">
-    <div class="sec-head"><span class="num">v</span><h2 id="h-method">How it's worked out</h2></div>
-    <div class="method">
+  <details class="method">
+    <summary class="bar" style="border-top:1px solid var(--ink)"><span class="n">v</span><h2>How it's worked out</h2><span class="label aside"></span></summary>
+    <div class="pad method-grid">
       <div><h3>Days to empty</h3><p>Uses per pack, divided by uses per week, times seven. The clock starts when the pack arrives.</p></div>
       <div><h3>Order by</h3><p>The day the pack runs out, minus shipping time, minus a two-day margin. Ordered by then, the next pack arrives before the last use.</p></div>
       <div><h3>Reorder window</h3><p>Opens about a quarter of the pack's life before the order-by day (between 3 and 10 days). Longer windows get a reminder in the middle.</p></div>
@@ -300,29 +348,21 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
       <div><h3>Afterglow, tempo, rest</h3><p>Afterglow emails follow the purchase and ask for nothing. Tempo emails follow the pack running down. Rest is the one quiet note after it runs out.</p></div>
       <div><h3>Your real numbers</h3><p>The examples are illustrative. Replace them with what your customers actually do: reviews and support replies often mention how fast a pack goes.</p></div>
     </div>
-  </section>
-  <hr>
+  </details>
 
-  <section class="door" aria-labelledby="h-door">
+  <div class="tear" aria-hidden="true" style="margin-top:8px"><span>✂</span></div>
+
+  <section class="door pad" aria-labelledby="h-door" style="padding-top:36px">
     <span class="label">The Second-Order System</span>
-    <h2 id="h-door" style="margin-top:14px">Have this schedule built, <span class="serif">timed to your product.</span></h2>
-    <p>Every email above, written for your product, set to its tempo in Omnisend or Klaviyo, checked before anything goes live, and handed over working. Send your store and I'll reply with scope and fee.</p>
+    <h2 id="h-door">Have this schedule built, <span class="serif">timed to your product.</span></h2>
+    <p class="lede">Every email above, written for your product, set to its tempo in Omnisend or Klaviyo, checked before anything goes live, and handed over working. Send the slip and I'll reply with scope and fee.</p>
     <form class="start" method="POST" action="https://formspree.io/f/mgavqjoy" id="start">
       <input type="hidden" name="_subject" value="Cadence: a founder sent their numbers">
       <p class="hp"><label>Leave this empty <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
-      <div class="fields">
-        <div class="field">
-          <label class="label" for="f-name">Your name</label>
-          <input id="f-name" name="founder" type="text" required autocomplete="name">
-        </div>
-        <div class="field">
-          <label class="label" for="f-email">Email</label>
-          <input id="f-email" name="email" type="email" required autocomplete="email">
-        </div>
-        <div class="field">
-          <label class="label" for="f-store">Store URL</label>
-          <input id="f-store" name="store" type="url" required placeholder="https://" autocomplete="url">
-        </div>
+      <div class="lines">
+        <div class="line"><label class="label" for="f-name">Your name</label><input id="f-name" name="founder" type="text" required autocomplete="name"></div>
+        <div class="line"><label class="label" for="f-email">Email</label><input id="f-email" name="email" type="email" required autocomplete="email"></div>
+        <div class="line"><label class="label" for="f-store">Store URL</label><input id="f-store" name="store" type="url" required placeholder="https://" autocomplete="url"></div>
       </div>
       <input type="hidden" name="product">
       <input type="hidden" name="uses_per_pack">
@@ -332,19 +372,19 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
       <input type="hidden" name="schedule">
       <input type="hidden" name="link">
       <div class="actions">
-        <button class="btn" type="submit">Send my numbers</button>
-        <span class="status" id="form-status" aria-live="polite">Your calculator numbers are sent with it.</span>
+        <button class="btn" type="submit">Send the slip</button>
+        <span class="status" id="form-status" aria-live="polite">Your calculator numbers travel with it.</span>
       </div>
     </form>
-    <p class="thanks" id="thanks" hidden>Sent. I have your numbers and your store, and I'll reply by email with scope and fee.</p>
+    <p class="thanks" id="thanks" hidden>Received. I have your numbers and your store, and I'll reply by email with scope and fee.</p>
     <p class="small">Want to see more first? <a href="https://khariangel.framer.website/">See the work</a>.</p>
   </section>
-  <hr>
 
-  <footer>
-    <span class="label">Cadence · Khari Angel</span>
-    <span class="label">Growth strategist · Los Angeles</span>
+  <footer class="colophon">
+    <span class="label">Cadence Calculator</span>
+    <span class="label">Khari Angel · Growth strategist</span>
   </footer>
+</main>
 </div>
 
 <script>
@@ -402,7 +442,7 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
       { key: "thanks", day: 0, layer: "afterglow", ask: false, name: "Thank you", why: "Confirms the order and says what happens next. Often the store's order confirmation." },
       { key: "howto", day: S, layer: "afterglow", ask: false, name: "How to use it", why: "Lands with the package: the first use, step by step." },
       { key: "last", day: orderBy, layer: "tempo", ask: true, name: "Last call", why: "Order today and the next pack arrives before the last one runs out." },
-      { key: "open", day: open, layer: "tempo", ask: true, name: "Reorder opens", why: "How much is likely left, and a one-click way to reorder." },
+      { key: "open", day: open, layer: "tempo", ask: true, name: "Reorder opens", why: "How much is likely left, a \"your usual\" link that refills the cart, and a \"not yet\" link that pushes this back." },
       { key: "checkin", day: checkin, layer: "afterglow", ask: false, name: "First-week check-in", why: "Asks how the first uses went. Invites a reply." },
       { key: "nudge", day: nudge, layer: "tempo", ask: true, name: "Reminder", why: "The order-by date, stated plainly." },
       { key: "mid", day: mid, layer: "tempo", ask: false, name: "Midpoint", why: "The maker, the batch, what to pair it with. No sell." },
@@ -477,7 +517,7 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
   var AXIS_Y = 112, PAD = 18;
 
   function buildTimeline(W) {
-    var s = "<svg viewBox='0 0 " + W + " 190' xmlns='http://www.w3.org/2000/svg' style='font-family:Hanken Grotesk, system-ui, sans-serif'>";
+    var s = "<svg viewBox='0 0 " + W + " 190' xmlns='http://www.w3.org/2000/svg' style='font-family:Archivo, system-ui, sans-serif'>";
     s += "<rect id='tl-band' class='mv' x='0' y='" + (AXIS_Y - 16) + "' width='1' height='32' style='fill:var(--band)'/>";
     s += "<line x1='" + PAD + "' x2='" + (W - PAD) + "' y1='" + AXIS_Y + "' y2='" + AXIS_Y + "' style='stroke:var(--ink)'/>";
     s += "<g id='tl-ticks'></g>";
@@ -489,8 +529,8 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
       var col = "var(--" + k.layer + ")";
       s += "<g id='tl-" + k.key + "' class='mv' style='opacity:0'>" +
         "<line x1='0' x2='0' y1='11' y2='60' style='stroke:" + col + "'/>" +
-        "<circle r='11' cx='0' cy='0' style='stroke:" + col + ";stroke-width:1.5;fill:" + (k.ask ? col : "var(--bg)") + "'/>" +
-        "<text y='4.5' font-size='12' font-weight='600' text-anchor='middle' style='fill:" + (k.ask ? "var(--bg)" : col) + "'></text></g>";
+        "<circle r='11' cx='0' cy='0' style='stroke:" + col + ";stroke-width:1.5;fill:" + (k.ask ? col : "var(--paper)") + "'/>" +
+        "<text y='4.5' font-size='12' font-weight='600' text-anchor='middle' style='fill:" + (k.ask ? "var(--paper)" : col) + "'></text></g>";
     });
     s += "</svg>";
     $("timeline").innerHTML = s;
@@ -625,7 +665,7 @@ footer { padding: 24px 0 40px; display: flex; justify-content: space-between; fl
   }
   function syncThemeButton() {
     var dark = isDark();
-    $("theme").textContent = dark ? "Light" : "Dark";
+    $("theme").textContent = dark ? "Day" : "Night";
     $("theme").setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
   }
   try { var saved = localStorage.getItem("cadence-theme"); if (saved) document.documentElement.setAttribute("data-theme", saved); } catch (e) {}
